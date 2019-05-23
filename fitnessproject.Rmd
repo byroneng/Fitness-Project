@@ -1,0 +1,114 @@
+---
+title: "Physiological Time Response"
+output: 
+  flexdashboard::flex_dashboard:
+    storyboard: true
+    social: menu
+    source: embed
+    theme: spacelab
+
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(dygraphs)
+source('fitnessstatic.R')
+```
+
+
+### Data Overview. Data was collected on caloric intake, minutes exercised, and body weight.
+
+```{r,echo=FALSE}
+dygraph(fit.xts,xlab='Date') %>%
+  dySeries('Weight',axis='y2',pointSize=3) %>%
+  dySeries('Exercise_Minutes',axis='y2',fillGraph=T) %>%
+  dyHighlight(highlightSeriesOpts = list(strokeWidth = 3)) %>%
+  dyRangeSelector(dateWindow=c('2016-06-22','2016-08-16'))
+
+```
+
+***
+
+During the data collection period, calories, exercise, and body weight were recorded via http://www.myfitnesspal.com/. The physical activity during this period was highly anomalous for the individual, and overeating was avoided most days.
+
+- Calories: This dataset is quite noisy due to varying appetite and inconsistent data collection. During this time a theoretical calorie limit was enforced. Caloric intake was less than the calorie limit on most days. The data were all input manually via computer or cell phone. There are days with missing or incomplete data. The calories data will be key in answering questions associated with physiological time response.
+
+- Exercise: Most exercise during this time was from biking. These data were input automatically through MapMyRide (http://www.mapmyride.com/). Other exercise was input manually via computer or cell phone.
+
+- Body Weight: Body weight was logged manually on a weekly basis.
+
+### Scatter plot 1: Caloric intake vs. body weight.
+
+```{r}
+scatplot <- 'Overeating'
+source('fitnessregression.R')
+
+plot_ly(fit.df,x=Calories,y=Weight,mode='markers',type='scatter') %>%
+add_trace(x=c(0,3535),y=c(overlm$coefficients[1],overlm$coefficients[1]+(3535*overlm$coefficients[2]))) %>%
+layout(showlegend=F,annotations=list(x=3000,y=(3000*overlm$coefficients[2])+overlm$coefficients[1],
+                                     text=paste('R²=',signif(summary(overlm)$r.squared,3))),size=2)
+
+
+```
+
+***
+
+This plot tests the relationship between caloric intake and body weight. Weekly body weight data were linearly interpolated to approximate a more complete data set. There is virtually no correlation between caloric intake and same-day body weight. A day shift was applied to the weight data later in this study to test the time response between over-eating and increased weight. It can be seen in this plot that the lack of correlation is not due to incomplete calorie data.
+
+### Scatter plot 2: Minutes exercised vs. caloric intake.
+
+```{r}
+scatplot <- 'Appetite'
+source('fitnessregression.R')
+
+plot_ly(fit.df,x=Exercise_Minutes,y=Calories,mode='markers',type='scatter') %>%
+add_trace(x=c(0,122),y=c(appelm$coefficients[1],appelm$coefficients[1]+(122*appelm$coefficients[2]))) %>%
+layout(showlegend=F,annotations=list(x=20,y=(20*appelm$coefficients[2])+appelm$coefficients[1],
+                                     text=paste('R²=',signif(summary(appelm)$r.squared,3))),size=2)
+
+```
+
+***
+
+This plot tests the relationship between minutes exercised and caloric intake. The data show no correlation between minutes exercised and same-day caloric intake. The individual was under a strict daily calorie limit. This plot shows that extensive overeating did not occur on days of high physical activity. The time response of increased appetite due to increased physical activity is tested later in the study.
+
+### Scatter plot 3: Minutes exercised vs. body weight.
+
+```{r}
+scatplot <- 'Exercise'
+source('fitnessregression.R')
+
+plot_ly(fit.df,x=Exercise_Minutes,y=Weight,mode='markers',type='scatter') %>%
+add_trace(x=c(0,122),y=c(weiglm$coefficients[1],weiglm$coefficients[1]+(122*weiglm$coefficients[2]))) %>%
+layout(showlegend=F,annotations=list(x=20,y=(20*weiglm$coefficients[2])+weiglm$coefficients[1],
+                                     text=paste('R²=',signif(summary(weiglm)$r.squared,3))),size=2)
+```
+
+***
+
+This plot shows the relationship between minutes exercised and body weight. The plot shows a slight correlation between the two variables tested. The correlation is too small to definitively attribute a causality to the data. A day shift is applied to the body weight data later in this study to test for the time response of body weight to increased physical activity.
+
+### R² over time. Investigating time response.
+
+```{r}
+source('rsquare.R')
+
+ggplot(rsq,aes(x=Days,y=Rsquare,col=as.factor(Scatter))) +
+  geom_point() +
+  geom_line() +
+  labs(title='Correlation After Delay',x='Days Delayed',y='R²') +
+  scale_color_manual(labels=c('Scatter Plot 1','Scatter Plot 2','Scatter Plot 3'),values=c('red','green','blue')) +
+  guides(color=guide_legend(''))
+
+```
+
+***
+The variables from the three scatter plots were tested for correlation after applying a day shift to the dependent variables (y-axis in the scatter plots). The day shift tests the relationship between the independent variable and the dependent variable a number of days later, ranging from 0 to 21 days. This plot shows how the R² value changes within the day shift range.
+
+  - <span style="color:red">Scatter Plot 1: Caloric intake vs. body weight.</span> The correlation under the day shifts remained negligible. The data had no day-to-day correlation between calorie consumption and body weight. With more complete data over a longer period of time the test could be run again after aggregating the data to weekly or monthly averages.
+  
+  - <span style="color:green">Scatter Plot 2: Minutes exercised vs. caloric intake.</span> The correlation between physical activity and appetite resembles a periodic step function. However, the correlation is very small even at the peaks. The shape of the plot is more likely due to weekly routines, such as eating more on weekends after biking to work all week. A test with more complete data and without the daily calorie limit might produce more strongly correlated results to observe the appetite's time response.
+  
+  - <span style="color:blue">Scatter Plot 3: Minutes exercised vs. body weight.</span> The correlation shown in this line is small, but non-zero. The shape of this plot shows 2 periods of stronger correlation than the rest of the days. This could be due to the body's short-term weight loss due to sweating (water weight) and long-term weight loss due to fat burning.
+  
+  - Conclusions: More complete data over a longer period of time could give a better understanding of the body's time response. The human body is so complex, one would not expect any correlation to reach very high. However, the patterns of time response could shed light on topics of personal fitness and health. An individual attempting significant weight loss could be empowered by understanding their body's time response during perceived plateaus or regressions. The average person expects results of their actions to be short-term. A more comprehensive study like this one could prove that is not the case.

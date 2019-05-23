@@ -1,0 +1,18 @@
+{
+    "contents" : "### This script runs analyses based on fitness data.\nlibrary(ggplot2)\nlibrary(plotly)\nlibrary(xts)\nlibrary(plyr)\n\n##Options:\nstartdate <- as.Date('2015-04-01')\nenddate   <- as.Date('2016-02-28')\n\nexercise <- read.csv('Exercise-Summary-2015-05-28-to-2016-07-01.csv')\nexercise <- read.csv('Exercise-Summary-full.csv')\nnames(exercise)[1] <- 'Date'\nexercise$Date <- strptime(exercise$Date,format='%Y-%m-%d')+(60*60*24*416)\nexercise <- exercise[18:133,]\n\nweight <- read.csv('Measurement-Summary-2015-05-28-to-2016-07-01.csv')\nweight <- read.csv('Measurement-Summary-full.csv')\nnames(weight)[1] <- 'Date'\nweight$Date <- strptime(weight$Date,format='%Y-%m-%d')+(60*60*24*416)\nweight <- weight[18:93,]\n\nnutrition <- read.csv('Nutrition-Summary-2015-05-28-to-2016-07-01.csv')\nnutrition <- read.csv('Nutrition-Summary-full.csv')\nnames(nutrition)[1] <- 'Date'\nnutrition$Date <- strptime(nutrition$Date,format='%Y-%m-%d')+(60*60*24*416)\nnutrition <- nutrition[4:246,]\ncalories <- tapply(nutrition$Calories,as.character(nutrition$Date),sum)\n\n## Set up xts objects\nexer.tapp <- tapply(exercise$Exercise.Minutes,as.POSIXct(exercise$Date,origin='1970-01-01'),sum)\nexer.xts <- xts(as.vector(exer.tapp),order.by=as.POSIXct(names(exer.tapp),origin='1970-01-01'))\nweig.xts <- xts(weight$Weight,order.by=as.POSIXct(weight$Date,origin='1970-01-01'))\ncalo.xts <- xts(as.vector(calories),order.by=as.POSIXct(names(calories),origin='1970-01-01'))\n\n## Data frames\nexer.df <- data.frame(as.Date(names(exer.tapp)),as.vector(exer.tapp))\n           names(exer.df)  <- c('Date','Exercise')\nweig.df <- data.frame(as.Date(weight$Date),weight$Weight)\n           names(weig.df) <- c('Date','Weight')\ncalo.df <- data.frame(as.Date(names(calories)),as.vector(calories))\n           names(calo.df)  <- c('Date','Calories')\n\ndaterange <- seq.Date(from=as.Date('2016-06-22'),to=as.Date('2016-08-16'),by='day')\n\nfit.xts <- cbind.xts(exer.xts,weig.xts,calo.xts)\n           names(fit.xts) <- c('Exercise_Minutes','Weight','Calories')\n\n\n# plot(exercise$Date,exercise$Exercise.Minutes,type='l',xlab='Date',ylab='Minutes')\n# title('Daily Exercise Minutes')\n# \n# plot(weight$Date,weight$Weight,type='l',xlab='Date',ylab='Weight [lbs]')\n# title('Weight')\n# \n# plot(calories,type='l',xaxt='n',xlab='Date',ylab='Calories [kCal]')\n# title('Calories')\n# \n# p <- ggplot(exercise,aes(x=exercise$Date,y=exercise$Exercise.Minutes)) +\n#             geom_point(shape=1)\n# ggplotly(p)",
+    "created" : 1470133222981.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "4269765606",
+    "id" : "9DC17198",
+    "lastKnownWriteTime" : 1470718102,
+    "path" : "C:/Users/byron/Dropbox/R/Freelance/8-1-2016 Exercise/fitnessstatic.R",
+    "project_path" : "fitnessstatic.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "type" : "r_source"
+}

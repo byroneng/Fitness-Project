@@ -1,0 +1,18 @@
+{
+    "contents" : "## This script runs a regression analysis on the fitness data\n\nif(!exists('fit.xts')) source('fitnessstatic.R')\nlibrary(plotly)\nif(!exists('shift')) shift <- 0\n\n##Date Frame\nfit.df <- data.frame(time(fit.xts),\n            as.vector(fit.xts$Exercise_Minutes),\n            as.vector(fit.xts$Weight),\n            as.vector(fit.xts$Calories))\n          names(fit.df) <- c('Date','Exercise_Minutes','Weight','Calories')\n\n          ##Set Exercise minutes to NA if value = 1\n          sel <- fit.df$Exercise_Minutes==1\n          sel[is.na(sel)] <- T\n          fit.df[sel,'Exercise_Minutes'] <- NA\n          \n\n          ##Linear interpolation between each data point to fill gaps\n          fit.df$Weight <- approx(fit.df$Date,fit.df$Weight,xout=fit.df$Date)$y\n          \n##Scatter plots\n    \n          if(scatplot=='Overeating'){\n          ##Calories vs Weight\n          weigstore <- fit.df$Weight\n          fit.df$Weight <- c(rep(NA,shift),fit.df[1:(nrow(fit.df)-shift),'Weight'])\n          overlm <- lm(fit.df$Weight~fit.df$Calories)\n          }\n          \n          if(scatplot=='Appetite'){\n          ##Exercise vs Calories\n          calostore <- fit.df$Calories\n          fit.df$Calories <- c(rep(NA,shift),fit.df[1:(nrow(fit.df)-shift),'Calories'])\n          appelm <- lm(fit.df$Calories~fit.df$Exercise_Minutes)\n          }\n          \n          if(scatplot=='Exercise'){\n          ##Exercise vs weight\n          fit.df$Weight <- weigstore\n          fit.df$Weight <- c(rep(NA,shift),fit.df[1:(nrow(fit.df)-shift),'Weight'])\n          weiglm <- lm(fit.df$Weight~fit.df$Exercise_Minutes)\n          }\n          \n          rm(shift)",
+    "created" : 1470309727955.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3993814321",
+    "id" : "CFDAF76",
+    "lastKnownWriteTime" : 1470629505,
+    "path" : "C:/Users/byron/Dropbox/R/Freelance/8-1-2016 Exercise/fitnessregression.R",
+    "project_path" : "fitnessregression.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "type" : "r_source"
+}

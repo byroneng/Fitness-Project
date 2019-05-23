@@ -1,0 +1,18 @@
+{
+    "contents" : "### This script tests the R^2 values of the 3 scatter plots under varying values of 'shift'\nrequire(ggplot2)\nrequire(plotly)\nrequire(xts)\nrequire(plyr)\n\nscatplot <- 'Overeating'\nrsq <- data.frame(NA,NA,NA)\n\n  for(i in 0:21){\n    shift <- i\n    source('fitnessregression.R')\n    rsq[i+1,] <- c(i,signif(summary(overlm)$r.squared,3),1)\n  }\n    \nscatplot <- 'Appetite'\n\n  for(i in 0:21){\n    shift <- i\n    source('fitnessregression.R')\n    rsq[i+23,] <- cbind(i,signif(summary(appelm)$r.squared,3),2)\n  }\n\nscatplot <- 'Exercise'\n\n  for(i in 0:21){\n    shift <- i\n    source('fitnessregression.R')\n    rsq[i+45,] <- cbind(i,signif(summary(weiglm)$r.squared,3),3)\n  }\n\ncolnames(rsq) <- c('Days','Rsquare','Scatter')\n  \n\n\n",
+    "created" : 1470629509957.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3852847626",
+    "id" : "2F1A1C4",
+    "lastKnownWriteTime" : 1470722889,
+    "path" : "C:/Users/byron/Dropbox/R/Freelance/8-1-2016 Exercise/rsquare.R",
+    "project_path" : "rsquare.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "type" : "r_source"
+}
